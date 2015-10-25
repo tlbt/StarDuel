@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<head>
+<script src="pixi.min.js"></script>
+<script src="keyboard.js"></script>
+</head>
+<meta charset="utf-8">
+<title>Base Test</title>
+<body>
+<style>* {padding: 0; margin: 0}</style>
+<script>
+
+// Declare variables that need to be accessible by all functions	
+var spaceShip;
+//var speed = 0;
+//var turnRate = .1;
+//var maxSpeed = 5;
+//var speedInc = 1.25;
+var Container = PIXI.Container,
+    autoDetectRenderer = PIXI.autoDetectRenderer,
+    loader = PIXI.loader,
+    resources = PIXI.loader.resources,
+    Sprite = PIXI.Sprite;
+
+var left = keyboard(37),
+      up = keyboard(38),
+      right = keyboard(39),
+      down = keyboard(40);
+
+//PIXI.Sprite.prototype.pbMethod = function () {};
+
+function Ship (model)  {
+	//PIXI.Sprite.apply(this, arguments)
+	//PIXI.Sprite.call( this, texture );
+	this.model = new Sprite(model);
+	this.speed = 0;
+	this.turnRate = .025;
+	this.maxSpeed = 5;
+	this.speedInc = 1.25;
+	console.log("Ship created");
+}
+
+
+
+//Create the renderer
+// CanvasRenderer and WebGLRenderer also available
+renderer = autoDetectRenderer(
+  256, 256,
+  {antialias: false, transparent: false, resolution: 1}
+);
+
+
+//Fullscreen the canvas
+renderer.view.style.position = "absolute"
+renderer.view.style.display = "block";
+renderer.autoResize = true;
+renderer.resize(window.innerWidth, window.innerHeight);
+
+//Add a colour to the canvas
+renderer.backgroundColor = 0x061639;
+
+//Add the canvas to the HTML document
+document.body.appendChild(renderer.view);
+
+//Create a container object called the `stage`
+var stage = new Container()
+
+//Tell the `renderer` to `render` the `stage`
+renderer.render(stage);
+
+//cache the image as a texture
+var TextureCache = PIXI.utils.TextureCache
+var texture = TextureCache["spaceship.png"];
+
+loader.add("spaceship.png").on("progress", loadProgressHandler).load(setup);
+
+function loadProgressHandler(loader, resource) {
+  //Display the file `url` currently being loaded
+  console.log("loading: " + resource.url); 
+
+  //Display the precentage of files currently loaded
+  console.log("progress: " + loader.progress + "%"); 
+
+  //If you gave your files names as the first argument 
+  //of the `add` method, you can access them like this
+  //console.log("loading: " + resource.name);
+}
+
+function setup() {
+//  spaceShip = new Ship(loader.resources["spaceship.png"].texture);
+	spaceShip = new Ship(loader.resources["spaceship.png"].texture);
+	 
+	 //Add the spaceship to the stage
+	  stage.addChild(spaceShip.model);
+		
+	spaceShip.model.position.set(100, 100);
+	
+	spaceShip.model.anchor.x = 0.5;
+	spaceShip.model.anchor.y = 0.5;
+	
+	spaceShip.model.vx = 0;
+	spaceShip.model.vy = 0;
+	
+	  //Render the stage   
+	renderer.render(stage);
+	
+	console.log("setup"); 	
+	
+	 //Left arrow key `press` method
+  left.press = function() {
+	console.log("left pressed"); 
+    //Change the spaceShip's velocity when the key is pressed
+    spaceShip.model.rotation -= spaceShip.turnRate;
+    
+  };
+
+  //Up
+  up.press = function() {
+    console.log("up pressed"); 
+    spaceShip.speed == spaceShip.maxSpeed ? (spaceShip.speed = spaceShip.maxSpeed) : (spaceShip.speed += spaceShip.speedInc);
+    spaceShip.model.vy += Math.sin(spaceShip.model.rotation) * spaceShip.speed;
+	spaceShip.model.vx += Math.cos(spaceShip.model.rotation) * spaceShip.speed;
+  };
+
+  //Right
+  right.press = function() {
+	  console.log("right pressed"); 
+    spaceShip.model.rotation += spaceShip.turnRate;
+  };
+
+  //Down
+  down.press = function() {
+		console.log("down pressed");
+		spaceShip.speed == 0 ? (spaceShip.speed = 0) : (spaceShip.speed -= spaceShip.speedInc);
+		spaceShip.model.vy -= Math.sin(spaceShip.model.rotation) * spaceShip.speed;
+		spaceShip.model.vx -= Math.cos(spaceShip.model.rotation) * spaceShip.speed;
+  };
+	gameLoop()
+}		
+
+function play() {
+
+	//Apply the velocity values to the spaceShip's 
+	//position to make it move	
+	spaceShip.model.x += spaceShip.model.vx;
+	spaceShip.model.y += spaceShip.model.vy;
+	checkHeld(spaceShip);
+	checkRotation(spaceShip);
+}
+		
+//Set the game's current state to `play`:
+var state = play;
+
+function gameLoop() {
+	//Loop this function at 60 frames per second
+	requestAnimationFrame(gameLoop);
+
+	//Update the current game state:
+	state();
+
+	//Render the stage to see the animation
+	renderer.render(stage);
+}
+
+</script>
+</body>

@@ -1,0 +1,2 @@
+import "pixi.min.js";
+
