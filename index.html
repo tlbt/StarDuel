@@ -10,7 +10,8 @@
 <script>
 
 // Declare variables that need to be accessible by all functions	
-var spaceShip;
+var cruiser1, cruiser2;
+var actors; 
 //var speed = 0;
 //var turnRate = .1;
 //var maxSpeed = 5;
@@ -28,18 +29,29 @@ var left = keyboard(37),
 
 //PIXI.Sprite.prototype.pbMethod = function () {};
 
-function Ship (model)  {
+function Cruiser (model)  {
 	//PIXI.Sprite.apply(this, arguments)
 	//PIXI.Sprite.call( this, texture );
 	this.model = new Sprite(model);
+	this.player = false;
 	this.speed = 0;
 	this.turnRate = .025;
 	this.maxSpeed = 5;
 	this.speedInc = 1.25;
-	console.log("Ship created");
+	console.log("Cruiser created");
 }
 
-
+function updatePosition(actorArray){
+	for (var x = 0; x < actorArray.length; x++){
+		var someShip = actorArray[x];
+		someShip.model.x += someShip.model.vx;
+		someShip.model.y += someShip.model.vy;
+		checkRotation(someShip);
+		if(someShip.player == true){
+			checkHeld(someShip);
+		}	
+	}
+}
 
 //Create the renderer
 // CanvasRenderer and WebGLRenderer also available
@@ -70,8 +82,10 @@ renderer.render(stage);
 //cache the image as a texture
 var TextureCache = PIXI.utils.TextureCache
 var texture = TextureCache["spaceship.png"];
+//var cruiser2texture = TextureCache["enemyship.png"];
 
-loader.add("spaceship.png").on("progress", loadProgressHandler).load(setup);
+loader.add("spaceship.png").on("progress", loadProgressHandler);
+loader.add("enemyship.png").on("progress", loadProgressHandler).load(setup);
 
 function loadProgressHandler(loader, resource) {
   //Display the file `url` currently being loaded
@@ -85,55 +99,40 @@ function loadProgressHandler(loader, resource) {
   //console.log("loading: " + resource.name);
 }
 
+
 function setup() {
 //  spaceShip = new Ship(loader.resources["spaceship.png"].texture);
-	spaceShip = new Ship(loader.resources["spaceship.png"].texture);
-	 
+	cruiser1 = new Cruiser(loader.resources["spaceship.png"].texture);
+	cruiser1.player = true;
+	cruiser2 = new Cruiser(loader.resources["enemyship.png"].texture); 
 	 //Add the spaceship to the stage
-	  stage.addChild(spaceShip.model);
-		
-	spaceShip.model.position.set(100, 100);
+	stage.addChild(cruiser1.model);
+	stage.addChild(cruiser2.model);	
+	cruiser1.model.position.set(100, 100);
+	cruiser2.model.position.set(400, 400);
 	
-	spaceShip.model.anchor.x = 0.5;
-	spaceShip.model.anchor.y = 0.5;
+	cruiser1.model.anchor.x = 0.5;
+	cruiser1.model.anchor.y = 0.5;
 	
-	spaceShip.model.vx = 0;
-	spaceShip.model.vy = 0;
+	cruiser2.model.anchor.x = 0.5;
+	cruiser2.model.anchor.y = 0.5;
+	
+	cruiser1.model.vx = 0;
+	cruiser1.model.vy = 0;
+	
+	cruiser2.model.vx = 0;
+	cruiser2.model.vy = 0;
+	
+	
+	// Call the setup function for the first player controls
+	setupPlayer1Kb(cruiser1);
+	actors = [cruiser1, cruiser2];
 	
 	  //Render the stage   
 	renderer.render(stage);
 	
 	console.log("setup"); 	
-	
-	 //Left arrow key `press` method
-  left.press = function() {
-	console.log("left pressed"); 
-    //Change the spaceShip's velocity when the key is pressed
-    spaceShip.model.rotation -= spaceShip.turnRate;
-    
-  };
 
-  //Up
-  up.press = function() {
-    console.log("up pressed"); 
-    spaceShip.speed == spaceShip.maxSpeed ? (spaceShip.speed = spaceShip.maxSpeed) : (spaceShip.speed += spaceShip.speedInc);
-    spaceShip.model.vy += Math.sin(spaceShip.model.rotation) * spaceShip.speed;
-	spaceShip.model.vx += Math.cos(spaceShip.model.rotation) * spaceShip.speed;
-  };
-
-  //Right
-  right.press = function() {
-	  console.log("right pressed"); 
-    spaceShip.model.rotation += spaceShip.turnRate;
-  };
-
-  //Down
-  down.press = function() {
-		console.log("down pressed");
-		spaceShip.speed == 0 ? (spaceShip.speed = 0) : (spaceShip.speed -= spaceShip.speedInc);
-		spaceShip.model.vy -= Math.sin(spaceShip.model.rotation) * spaceShip.speed;
-		spaceShip.model.vx -= Math.cos(spaceShip.model.rotation) * spaceShip.speed;
-  };
 	gameLoop()
 }		
 
@@ -141,10 +140,8 @@ function play() {
 
 	//Apply the velocity values to the spaceShip's 
 	//position to make it move	
-	spaceShip.model.x += spaceShip.model.vx;
-	spaceShip.model.y += spaceShip.model.vy;
-	checkHeld(spaceShip);
-	checkRotation(spaceShip);
+	updatePosition(actors);
+	
 }
 		
 //Set the game's current state to `play`:
