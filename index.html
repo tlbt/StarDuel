@@ -2,6 +2,7 @@
 <head>
 <script src="pixi.min.js"></script>
 <script src="keyboard.js"></script>
+<!--<script src="charm.js"></script>-->
 </head>
 <meta charset="utf-8">
 <title>Base Test</title>
@@ -20,8 +21,10 @@ var Container = PIXI.Container,
     autoDetectRenderer = PIXI.autoDetectRenderer,
     loader = PIXI.loader,
     resources = PIXI.loader.resources,
-    Sprite = PIXI.Sprite;
+    Sprite = PIXI.Sprite,
+    Graphics = PIXI.Graphics;
 
+//var c = new Charm(PIXI);
 var left = keyboard(37),
       up = keyboard(38),
       right = keyboard(39),
@@ -33,12 +36,16 @@ function Cruiser (model)  {
 	//PIXI.Sprite.apply(this, arguments)
 	//PIXI.Sprite.call( this, texture );
 	this.model = new Sprite(model);
+	this.beam = new Graphics();
+	this.beam.lineStyle(4, 0xFFFFFF, 1);
+	this.startedFiring = false;
+	this.frameOn = true;
 	this.player = false;
 	this.speed = 0;
 	this.turnRate = .025;
 	this.maxSpeed = 5;
 	this.speedInc = 1.25;
-	console.log("Cruiser created");
+	console.log("Cruiser created, Player: " + this.player);
 }
 
 function updatePosition(actorArray){
@@ -46,6 +53,24 @@ function updatePosition(actorArray){
 		var someShip = actorArray[x];
 		someShip.model.x += someShip.model.vx;
 		someShip.model.y += someShip.model.vy;
+		//if(someShip.startedFiring == false){
+			if(someShip.frameOn){
+				
+				someShip.beam.moveTo(someShip.model.x,someShip.model.y);
+				someShip.beam.lineTo(200,200);
+				//stage.addChild(cruiser1.beam);
+				someShip.frameOn = false;
+			}else{
+				//stage.removeChild(cruiser1.beam);
+				cruiser1.beam.clear();
+				someShip.frameOn = true
+			}
+			someShip.startedFiring = true;
+		//}
+		//someShip.beam.x = someShip.model.x;
+		//someShip.beam.y = someShip.model.y;
+		
+		
 		checkRotation(someShip);
 		if(someShip.player == true){
 			checkHeld(someShip);
@@ -123,6 +148,7 @@ function setup() {
 	cruiser2.model.vx = 0;
 	cruiser2.model.vy = 0;
 	
+	cruiser1.beam.lineStyle(2, 0x0000FF) 
 	
 	// Call the setup function for the first player controls
 	setupPlayer1Kb(cruiser1);
@@ -153,9 +179,13 @@ function gameLoop() {
 
 	//Update the current game state:
 	state();
-
+	stage.addChild(cruiser1.beam);
 	//Render the stage to see the animation
 	renderer.render(stage);
+	stage.removeChild(cruiser1.beam);
+	cruiser1.beam.clear();
+	
+//	c.update();
 }
 
 </script>
