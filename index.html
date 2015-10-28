@@ -53,25 +53,18 @@ function updatePosition(actorArray){
 		var someShip = actorArray[x];
 		someShip.model.x += someShip.model.vx;
 		someShip.model.y += someShip.model.vy;
-		//if(someShip.startedFiring == false){
-			if(someShip.frameOn){
+		
+		
+		//cruiser1.beam.clear();
+		//stage.removeChild(cruiser1.beam);
+		someShip.beam.moveTo(someShip.model.x,someShip.model.y);
+		someShip.beam.lineTo(200,200);
+		//stage.addChild(cruiser1.beam);
+		//
+		//
 				
-				someShip.beam.moveTo(someShip.model.x,someShip.model.y);
-				someShip.beam.lineTo(200,200);
-				//stage.addChild(cruiser1.beam);
-				someShip.frameOn = false;
-			}else{
-				//stage.removeChild(cruiser1.beam);
-				cruiser1.beam.clear();
-				someShip.frameOn = true
-			}
-			someShip.startedFiring = true;
-		//}
-		//someShip.beam.x = someShip.model.x;
-		//someShip.beam.y = someShip.model.y;
-		
-		
 		checkRotation(someShip);
+		
 		if(someShip.player == true){
 			checkHeld(someShip);
 		}	
@@ -172,20 +165,25 @@ function play() {
 		
 //Set the game's current state to `play`:
 var state = play;
-
+var counter = 0;
 function gameLoop() {
 	//Loop this function at 60 frames per second
 	requestAnimationFrame(gameLoop);
 
 	//Update the current game state:
 	state();
-	stage.addChild(cruiser1.beam);
+	
+	//stage.removeChild(cruiser1.beam);
+	
 	//Render the stage to see the animation
 	renderer.render(stage);
-	stage.removeChild(cruiser1.beam);
+	//stage.removeChild(cruiser1.beam);
+	//if(counter == 1){
 	cruiser1.beam.clear();
+	cruiser1.beam.lineStyle(2, 0x0000FF) 
+	stage.addChild(cruiser1.beam);
+	counter = 0;
 	
-//	c.update();
 }
 
 </script>
