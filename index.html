@@ -36,8 +36,19 @@ function Cruiser (model)  {
 	//PIXI.Sprite.apply(this, arguments)
 	//PIXI.Sprite.call( this, texture );
 	this.model = new Sprite(model);
+	this.foreBeams = [];
+	this.aftBeams = [];
+	for(var i = 0; i < 8; i++){
+		if(i<4){
+			this.foreBeams[i] = new Graphics();
+			this.foreBeams[i].lineStyle(4, 0xFFFFFF, 1);
+		}else{
+			this.aftBeams[i - 4] = new Graphics();
+			this.aftBeams[i - 4].lineStyle(4, 0xFFFFFF, 1);
+		}
+	}
 	this.beam = new Graphics();
-	this.beam.lineStyle(4, 0xFFFFFF, 1);
+	//this.beam.lineStyle(4, 0xFFFFFF, 1);
 	this.startedFiring = false;
 	this.frameOn = true;
 	this.player = false;
@@ -45,6 +56,19 @@ function Cruiser (model)  {
 	this.turnRate = .025;
 	this.maxSpeed = 5;
 	this.speedInc = 1.25;
+	
+	this.redrawWeapons = function(){
+		for(var i = 0; i <4; i++){
+			this.foreBeams[i].clear();
+			this.foreBeams[i].lineStyle(2, 0x0000FF);
+			stage.addChild(this.foreBeams[i])
+			
+			this.aftBeams[i].clear();
+			this.aftBeams[i].lineStyle(2, 0x0000FF);
+			stage.addChild(this.aftBeams[i])
+		}
+	}
+	
 	console.log("Cruiser created, Player: " + this.player);
 }
 
@@ -57,8 +81,12 @@ function updatePosition(actorArray){
 		
 		//cruiser1.beam.clear();
 		//stage.removeChild(cruiser1.beam);
-		someShip.beam.moveTo(someShip.model.x,someShip.model.y);
-		someShip.beam.lineTo(200,200);
+		for (var i = 0; i <4; i++){
+			someShip.foreBeams[i].moveTo(someShip.model.x+(i*4),someShip.model.y);
+			someShip.foreBeams[i].lineTo(400,400);
+			someShip.aftBeams[i].moveTo(someShip.model.x+(i*4-16),someShip.model.y);
+			someShip.aftBeams[i].lineTo(400,400);
+		}
 		//stage.addChild(cruiser1.beam);
 		//
 		//
@@ -179,9 +207,13 @@ function gameLoop() {
 	renderer.render(stage);
 	//stage.removeChild(cruiser1.beam);
 	//if(counter == 1){
-	cruiser1.beam.clear();
-	cruiser1.beam.lineStyle(2, 0x0000FF) 
-	stage.addChild(cruiser1.beam);
+	for (var x = 0; x < actors.length; x++){
+		var someShip = actors[x];
+		someShip.redrawWeapons();
+	}
+	//cruiser1.beam.clear();
+	//cruiser1.beam.lineStyle(2, 0x0000FF) 
+	//stage.addChild(cruiser1.beam);
 	counter = 0;
 	
 }
